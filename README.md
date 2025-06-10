@@ -1,6 +1,9 @@
-# 🛒 Chatbot Store Backend
 
-A Django-based backend for an AI-driven e-commerce platform. This project is designed with modularity and scalability in mind, featuring user authentication, a full-featured product store, and a chatbot system for real-time customer interaction.
+
+# 🛒 Ecommerce Chatbot
+
+## Backend Setup
+A Django-based backend for an e-commerce platform. This project is designed with modularity and scalability in mind, featuring user authentication, a full-featured product store, and a chatbot system for real-time customer interaction.
 
 ---
 
@@ -41,64 +44,29 @@ Edit
 
 ### 1. Clone the Repository
 
-```bash
+```
 git clone https://github.com/yourusername/chatbot_store.git
 cd chatbot_store
-2. Create and Activate a Virtual Environment
-python -m venv venv
+```
+### 2. Create and Activate a Virtual Environment
+```python -m venv venv
 source venv/bin/activate   # On Windows: venv\Scripts\activate
+```
 
-3. Install Dependencies
+### 3. Install Dependencies
+```
 pip install -r requirements.txt
-Include a requirements.txt like:
+```
 
-txt
-Copy
-Edit
-Django>=4.2
-djangorestframework
-djangorestframework-simplejwt
-channels
-channels_redis
-drf-yasg
-4. Run Migrations
-bash
-Copy
-Edit
+### 4. Run Migrations
+```
 python manage.py migrate
-5. Create a Superuser (Optional)
-bash
-Copy
-Edit
+```
+### 5. Create a Superuser (Optional)
+```
 python manage.py createsuperuser
-6. Start the Development Server
-bash
-Copy
-Edit
+```
+### 6. Start the Development Server
+```
 python manage.py runserver
-🔑 Authentication with SimpleJWT
-Get Token
-h
-Copy
-Edit
-POST /api/token/
-{
-    "username": "your_username",
-    "password": "your_password"
-}
-Refresh Token
-http
-Copy
-Edit
-POST /api/token/refresh/
-{
-    "refresh": "your_refresh_token"
-}
-Verify Token
-h
-Copy
-Edit
-POST /api/token/verify/
-{
-    "token": "your_token"
-}
+```
