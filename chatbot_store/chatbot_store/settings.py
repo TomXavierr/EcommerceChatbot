@@ -29,8 +29,8 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -92,7 +92,17 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'chatbot_store.wsgi.application'
+# WSGI_APPLICATION = 'chatbot_store.wsgi.application'
+
+ASGI_APPLICATION = 'chatbot_store.asgi.application'
+
+# Real-time layer using Redis
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [("127.0.0.1", 6379)]},
+    },
+}
 
 
 # Database
