@@ -1,7 +1,7 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Product, Cart, CartItem, Order
+from .models import Product, Cart, CartItem, Order, OrderItem
 from .serializers import ProductSerializer, CartSerializer, CartItemSerializer, OrderSerializer
 from django.shortcuts import get_object_or_404
 
@@ -81,13 +81,23 @@ class CreateOrderView(APIView):
 
         total = sum([item.product.price * item.quantity for item in cart.items.all()])
         order = Order.objects.create(user=request.user, total=total)
-        order.items.set(cart.items.all())
-        order.save()
+        
+        for cart_item in cart.items.all():
+            OrderItem.objects.create(
+                order=order,
+                product=cart_item.product,
+                quantity=cart_item.quantity,
+                price=cart_item.product.price
+            )
 
-        # Clear cart after order
         cart.items.all().delete()
+        serializer = OrderSerializer(order)
 
-        return Response({"message": "Order placed successfully."})
+        # return Response({"message": "Order placed successfully."})
+        return Response({
+            "message": "Order placed successfully.",
+            "order": serializer.data
+        }, status=status.HTTP_201_CREATED)
 
 
 class OrderListView(generics.ListAPIView):
