@@ -7,10 +7,12 @@ from django.shortcuts import get_object_or_404
 
 # --- Products ---
 class ProductListView(generics.ListAPIView):
+    permission_classes = [permissions.AllowAny]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
 class ProductDetailView(generics.RetrieveAPIView):
+    permission_classes = [permissions.AllowAny]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
