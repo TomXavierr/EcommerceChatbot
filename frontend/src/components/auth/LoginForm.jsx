@@ -1,5 +1,5 @@
 import { useState, useContext } from "react";
-import { AuthContext } from "../../context/AuthContext";
+import AuthContext from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
@@ -10,6 +10,7 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Login payload:", { username, password });
     const success = await loginUser(username, password);
     if (success) navigate("/store");
     else alert("Invalid credentials");
@@ -19,7 +20,7 @@ const LoginForm = () => {
     <form onSubmit={handleSubmit} className="max-w-sm mx-auto p-6 bg-white rounded shadow">
       <h2 className="text-2xl mb-4 font-bold">Login</h2>
       <input
-        type="username"
+        type="text"
         placeholder="Username"
         value={username}
         required

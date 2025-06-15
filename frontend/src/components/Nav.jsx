@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { headerLogo } from "../assets/images";
 import { hamburger } from "../assets/icons";
 import { useContext, useState } from 'react';
-import { AuthContext } from '../context/AuthContext';
+import AuthContext from '../context/AuthContext';
 
 const Nav = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

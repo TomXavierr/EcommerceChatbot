@@ -1,40 +1,38 @@
-import { createContext, useState, useEffect, useContext } from "react";
+import { useContext, createContext, useState, useEffect } from "react";
+import axios from "../utils/axios";
+import { jwtDecode } from "jwt-decode";
 
-export const AuthContext = createContext();
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [authTokens, setAuthTokens] = useState(() =>
-    localStorage.getItem("authTokens")
-      ? JSON.parse(localStorage.getItem("authTokens"))
-      : null
-  );
-  const [user, setUser] = useState(null);
-  const [cartCount, setCartCount] = useState(0);
+  const [authTokens, setAuthTokens] = useState(() => {
+    const tokens = localStorage.getItem("authTokens");
+    return tokens ? JSON.parse(tokens) : null;
+  });
 
-  useEffect(() => {
-    if (authTokens) {
-      const payload = JSON.parse(atob(authTokens.access.split(".")[1]));
-      setUser({
-        id: payload.user_id,
-        username: payload.username,
-        email: payload.email,
-      });
-    }
-  }, [authTokens]);
+  const [user, setUser] = useState(() => {
+    const userData = localStorage.getItem("user");
+    return userData ? JSON.parse(userData) : null;
+  });
 
   const loginUser = async (username, password) => {
-    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/token/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
+    try {
+      const response = await axios.post("/token/", { username, password });
+      if (response.status === 200) {
+        const tokens = response.data;
+        const decoded = jwtDecode(tokens.access);
+        console.log(decoded.user_id);
 
-    if (res.status === 200) {
-      const data = await res.json();
-      setAuthTokens(data);
-      localStorage.setItem("authTokens", JSON.stringify(data));
-      return true;
-    } else {
+        setAuthTokens(tokens);
+        setUser({ id: decoded.user_id });
+
+        localStorage.setItem("authTokens", JSON.stringify(tokens));
+        localStorage.setItem("user", JSON.stringify({ id: decoded.user_id }));
+
+        return true;
+      }
+    } catch (error) {
+      console.error("Login error:", error);
       return false;
     }
   };
@@ -43,19 +41,53 @@ export const AuthProvider = ({ children }) => {
     setAuthTokens(null);
     setUser(null);
     localStorage.removeItem("authTokens");
+    localStorage.removeItem("user");
   };
 
+  useEffect(() => {
+    if (!authTokens) return;
+
+    const interval = setInterval(async () => {
+      try {
+        if (!authTokens?.refresh) {
+          console.warn("No refresh token found in state.");
+          logoutUser();
+          return;
+        }
+
+        console.log("Attempting token refresh...");
+
+        const response = await axios.post("/token/refresh/", {
+          refresh: authTokens.refresh,
+        });
+
+        console.log("Refresh success:", response.data);
+
+        if (response.status === 200) {
+          const newTokens = response.data;
+          const decoded = jwtDecode(newTokens.access);
+          console.log("Decoded new access token user_id:", decoded.user_id);
+
+          setAuthTokens(newTokens);
+          setUser({ id: decoded.user_id });
+
+          localStorage.setItem("authTokens", JSON.stringify(newTokens));
+          localStorage.setItem("user", JSON.stringify({ id: decoded.user_id }));
+        } else {
+          console.warn("Refresh returned non-200 status. Logging out.");
+          logoutUser();
+        }
+      } catch (error) {
+        console.error("Token refresh failed:", error);
+        logoutUser();
+      }
+    }, 1000 * 60 * 3);
+
+    return () => clearInterval(interval);
+  }, [authTokens]);
+
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        authTokens,
-        loginUser,
-        logoutUser,
-        cartCount,
-        setCartCount,
-      }}
-    >
+    <AuthContext.Provider value={{ user, authTokens, loginUser, logoutUser }}>
       {children}
     </AuthContext.Provider>
   );
@@ -63,53 +95,4 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => useContext(AuthContext);
 
-
-// import { createContext, useState, useEffect } from "react";
-
-// export const AuthContext = createContext();
-
-// export const AuthProvider = ({ children }) => {
-//   const [authTokens, setAuthTokens] = useState(() =>
-//     localStorage.getItem("authTokens")
-//       ? JSON.parse(localStorage.getItem("authTokens"))
-//       : null
-//   );
-//   const [user, setUser] = useState(null);
-
-//   useEffect(() => {
-//     if (authTokens) {
-//       const payload = JSON.parse(atob(authTokens.access.split(".")[1]));
-//       setUser({ username: payload.username });
-//     }
-//   }, [authTokens]);
-
-//   const loginUser = async (username, password) => {
-//     const res = await fetch("http://127.0.0.1:8000/api/token/", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ username, password }),
-//     });
-
-//     if (res.status === 200) {
-//       const data = await res.json();
-//       setAuthTokens(data);
-//       console.log(data);
-//       localStorage.setItem("authTokens", JSON.stringify(data));
-//       return true;
-//     } else {
-//       return false;
-//     }
-//   };
-
-//   const logoutUser = () => {
-//     setAuthTokens(null);
-//     setUser(null);
-//     localStorage.removeItem("authTokens");
-//   };
-
-//   return (
-//     <AuthContext.Provider value={{ user, authTokens, loginUser, logoutUser }}>
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// };
+export default AuthContext;

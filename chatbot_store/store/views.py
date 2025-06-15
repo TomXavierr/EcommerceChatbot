@@ -4,12 +4,24 @@ from rest_framework.views import APIView
 from .models import Product, Cart, CartItem, Order, OrderItem
 from .serializers import ProductSerializer, CartSerializer, CartItemSerializer, OrderSerializer
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
-# --- Products ---
 class ProductListView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    
+    def get_queryset(self):
+        queryset = Product.objects.all()
+        search_query = self.request.query_params.get("search")
+        category_query = self.request.query_params.get("category")
+
+        if search_query:
+            queryset = queryset.filter(name__icontains=search_query)
+        elif category_query:
+            queryset = queryset.filter(category__name__icontains=category_query)
+
+        return queryset
 
 class ProductDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.AllowAny]
@@ -17,7 +29,6 @@ class ProductDetailView(generics.RetrieveAPIView):
     serializer_class = ProductSerializer
 
 
-# --- Cart Operations ---
 class CartView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -72,7 +83,6 @@ class ClearCartView(APIView):
         return Response({"message": "Cart cleared."})
 
 
-# --- Orders ---
 class CreateOrderView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -95,7 +105,6 @@ class CreateOrderView(APIView):
         cart.items.all().delete()
         serializer = OrderSerializer(order)
 
-        # return Response({"message": "Order placed successfully."})
         return Response({
             "message": "Order placed successfully.",
             "order": serializer.data
@@ -107,4 +116,4 @@ class OrderListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user)
+        return Order.objects.filter(user=self.request.user).order_by('-ordered_at')
