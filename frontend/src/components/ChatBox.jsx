@@ -64,6 +64,14 @@ const ChatBox = ({ onClose }) => {
     }
   };
 
+  const clearChat = () => {
+    if (ws.current?.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify({ user_id: userId, clear_chat: true }));
+      // Clear messages locally immediately (optional, you can wait for server confirmation)
+      setMessages([]);
+    }
+  };
+
   return (
     <div className="w-80 sm:w-96 h-96 bg-white shadow-lg border-2 border-black rounded-lg flex flex-col overflow-hidden">
       <div className="bg-coral-red text-white px-4 py-2 flex justify-between items-center">
@@ -74,25 +82,18 @@ const ChatBox = ({ onClose }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-50">
-        {/* {messages.length === 0 && (
-          <div className="p-2 rounded-md max-w-xs bg-gray-200 self-start">
-            Welcome! Click "Load Conversation" to view your chat history.
-          </div>
-        )} */}
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`p-2 rounded-md max-w-xs ${
-              msg.sender === "user"
-                ? "bg-blue-100 self-end"
-                : "bg-gray-200 self-start"
-            }`}
-          >
-            {(() => {
-              const urlRegex = /(\/store\?[^ ]+|\/products\/\d+)/g;
-              const parts = msg.text.split(urlRegex);
+        {messages.map((msg, idx) => {
+          const urlRegex = /(\/store\?[^ ]+|\/products\/\d+)/g;
+          const parts = msg.text.split(urlRegex);
 
-              return parts.map((part, i) =>
+          return (
+            <div
+              key={idx}
+              className={`p-2 rounded-md max-w-xs ${
+                msg.sender === "user" ? "bg-blue-100 self-end" : "bg-gray-200 self-start"
+              }`}
+            >
+              {parts.map((part, i) =>
                 urlRegex.test(part) ? (
                   <span
                     key={i}
@@ -100,21 +101,17 @@ const ChatBox = ({ onClose }) => {
                       navigate(part);
                       onClose();
                     }}
-                    style={{
-                      cursor: "pointer",
-                      color: "blue",
-                      textDecoration: "underline",
-                    }}
+                    style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
                   >
                     {part}
                   </span>
                 ) : (
                   <span key={i}>{part}</span>
                 )
-              );
-            })()}
-          </div>
-        ))}
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div className="p-2 border-t flex gap-2">
@@ -123,6 +120,12 @@ const ChatBox = ({ onClose }) => {
           className="bg-green-600 text-white px-3 rounded hover:bg-green-700"
         >
           Load Conversation
+        </button>
+        <button
+          onClick={clearChat}
+          className="bg-red-600 text-white px-3 rounded hover:bg-red-700"
+        >
+          Clear Chat
         </button>
       </div>
 

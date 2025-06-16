@@ -1,8 +1,10 @@
 import json
+from datetime import datetime
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.utils.timezone import now
 from django.contrib.auth import get_user_model
+from django.utils.timezone import now, localtime
 
 from .nlp_utils import extract_keywords
 
@@ -42,6 +44,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except User.DoesNotExist:
             print(f"[ChatConsumer] No user found with id {user_id}")
             await self.send_bot_message("User not found.")
+            return
+        
+        if data.get("load_history"):
+            print("[ChatConsumer] Loading today's message history")
+            history = await self.load_today_messages(user)
+            for msg in history:
+                await self.send(text_data=json.dumps({
+                    "sender": msg["sender"],
+                    "message": msg["message"],
+                }))
             return
 
         if user_msg:
@@ -107,3 +119,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def save_message(self, user, sender, message):
         user.chatmessage_set.create(sender=sender, message=message)
+    
+    @database_sync_to_async
+    def load_today_messages(self, user):
+        today = localtime(now()).date()
+        return list(
+            user.chatmessage_set.filter(
+                timestamp__date=today
+            ).order_by("timestamp").values("sender", "message")
+        )
