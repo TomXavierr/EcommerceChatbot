@@ -1,5 +1,8 @@
 # 🛒 Chatbot-Powered E-commerce Store
-An e-commerce web application with an intelligent chatbot assistant to guide users from product discovery to checkout. Built with Django Rest Framework, React, WebSockets, and JWT Authentication.
+An e-commerce web application with an intelligent chatbot assistant to provide users a seamless shopping exerience. Built with Django Rest Framework, React, WebSockets, and JWT Authentication.
+
+# 🧠 Current Capabilities & Limitations
+The chatbot-powered e-commerce store currently supports intelligent product discovery through natural language queries. Users can interact with the chatbot to search for products based on keywords, such as category or color (e.g., “Show me Laptop”), and receive a list of matching products with clickable links that redirect them to the product listing page. However, at this stage, the chatbot does not handle cart operations (like adding/removing items) or order placement directly via chat. These functionalities are available through the traditional UI and REST API. Future updates aim to extend the chatbot's capabilities to fully manage cart and checkout processes, making the shopping experience more seamless and conversational.
 
 # 📌 Features
 - 🔐 JWT-based user authentication (SimpleJWT)
@@ -11,8 +14,6 @@ An e-commerce web application with an intelligent chatbot assistant to guide use
 - 🤖 Chatbot assistant (WebSocket-based)
 
    - Product search via chat
-
-  - Cart manipulation via chat
 
   - Quick filtering and navigation
 
