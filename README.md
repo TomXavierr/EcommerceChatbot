@@ -87,18 +87,6 @@ React app runs at http://localhost:5173 by default
 
 - WebSocket URL: ws://localhost:8000/ws/chat/
 
-📁 Project Structure
-bash
-Copy
-Edit
-chatbot_store/
-├── accounts/          # User auth and management
-├── store/             # Products, Cart, Orders
-├── chat/              # Chatbot logic and consumers
-├── frontend/          # React frontend
-├── db.sqlite3
-├── manage.py
-└── requirements.txt
 
 # 📦 API Overview
 POST /api/token/ — Login
