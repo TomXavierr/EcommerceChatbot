@@ -47,17 +47,17 @@ class Command(BaseCommand):
         for category_name, product_names in catalog.items():
             category, _ = Category.objects.get_or_create(name=category_name)
 
-            for base_name in product_names:
-                for _ in range(random.randint(2, 3)):  # 2–3 variants per product
-                    name = f"{base_name} {random.choice(['', 'Pro', 'Max', 'Plus', 'Ultra'])}".strip()
-                    Product.objects.create(
-                        name=name,
-                        description=fake.sentence(nb_words=12),
-                        image='products/default.jpg',  
-                        price=round(random.uniform(5000.0, 150000.0), 2),
-                        stock=random.randint(10, 50),
-                        category=category
-                    )
-                    total_created += 1
+            for name in product_names:
+                Product.objects.create(
+                    name=name,
+                    description=fake.sentence(nb_words=12),
+                    image='products/default.jpg',  # Placeholder path
+                    price=round(random.uniform(5000.0, 150000.0), 2),
+                    stock=random.randint(10, 50),
+                    category=category
+                )
+                total_created += 1
 
-        self.stdout.write(self.style.SUCCESS(f"✅ Successfully created {total_created} products across {len(catalog)} categories."))
+        self.stdout.write(self.style.SUCCESS(
+            f"✅ Successfully created {total_created} unique products across {len(catalog)} categories."
+        ))

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useAuth from "../context/AuthContext";
+import {useAuth} from "../context/AuthContext";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -35,10 +35,10 @@ const Register = () => {
       });
 
       if (res.ok) {
-        // Try to login after successful registration
+        
         const loggedIn = await loginUser(formData.username, formData.password);
         if (loggedIn) {
-          navigate("/"); // Redirect to home or dashboard
+          navigate("/"); 
         } else {
           setError("Registration succeeded, but login failed.");
         }

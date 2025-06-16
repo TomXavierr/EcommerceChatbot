@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }) => {
           const decoded = jwtDecode(newAccessToken);
           console.log("Decoded new access token user_id:", decoded.user_id);
 
-          // ✅ Important: Retain the existing refresh token
+      
           const newTokens = {
             access: newAccessToken,
             refresh: authTokens.refresh,

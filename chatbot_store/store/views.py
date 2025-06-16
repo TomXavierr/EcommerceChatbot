@@ -4,13 +4,26 @@ from rest_framework.views import APIView
 from .models import Product, Cart, CartItem, Order, OrderItem
 from .serializers import ProductSerializer, CartSerializer, CartItemSerializer, OrderSerializer
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
+# Query params for search and category
+search_param = openapi.Parameter(
+    'search', openapi.IN_QUERY, description="Search by product name", type=openapi.TYPE_STRING
+)
+category_param = openapi.Parameter(
+    'category', openapi.IN_QUERY, description="Filter by category name", type=openapi.TYPE_STRING
+)
 
 class ProductListView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    
+
+    @swagger_auto_schema(manual_parameters=[search_param, category_param])
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
     def get_queryset(self):
         queryset = Product.objects.all()
         search_query = self.request.query_params.get("search")
@@ -23,6 +36,7 @@ class ProductListView(generics.ListAPIView):
 
         return queryset
 
+
 class ProductDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.AllowAny]
     queryset = Product.objects.all()
@@ -32,14 +46,27 @@ class ProductDetailView(generics.RetrieveAPIView):
 class CartView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    @swagger_auto_schema(responses={200: CartSerializer})
     def get(self, request):
         cart, created = Cart.objects.get_or_create(user=request.user)
         serializer = CartSerializer(cart)
         return Response(serializer.data)
 
+
 class AddToCartView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["product_id", "quantity"],
+            properties={
+                'product_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'quantity': openapi.Schema(type=openapi.TYPE_INTEGER),
+            },
+        ),
+        responses={200: "Item added"}
+    )
     def post(self, request):
         cart, _ = Cart.objects.get_or_create(user=request.user)
         product_id = request.data.get('product_id')
@@ -58,6 +85,16 @@ class AddToCartView(APIView):
 class UpdateCartItemView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["quantity"],
+            properties={
+                'quantity': openapi.Schema(type=openapi.TYPE_INTEGER),
+            },
+        ),
+        responses={200: openapi.Response('Cart item updated')}
+    )
     def put(self, request, item_id):
         cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
         cart_item.quantity = request.data.get('quantity', cart_item.quantity)
@@ -68,6 +105,7 @@ class UpdateCartItemView(APIView):
 class RemoveCartItemView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    @swagger_auto_schema(responses={200: openapi.Response('Item removed')})
     def delete(self, request, item_id):
         cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
         cart_item.delete()
@@ -77,6 +115,7 @@ class RemoveCartItemView(APIView):
 class ClearCartView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    @swagger_auto_schema(responses={200: openapi.Response('Cart cleared')})
     def delete(self, request):
         cart = get_object_or_404(Cart, user=request.user)
         cart.items.all().delete()
@@ -86,6 +125,10 @@ class ClearCartView(APIView):
 class CreateOrderView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    @swagger_auto_schema(
+        responses={201: openapi.Response("Order created", OrderSerializer),
+                   400: "Cart is empty"}
+    )
     def post(self, request):
         cart = get_object_or_404(Cart, user=request.user)
         if not cart.items.exists():
@@ -114,6 +157,10 @@ class CreateOrderView(APIView):
 class OrderListView(generics.ListAPIView):
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    @swagger_auto_schema(responses={200: OrderSerializer(many=True)})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user).order_by('-ordered_at')
