@@ -28,7 +28,7 @@ The chatbot-powered e-commerce store currently supports intelligent product disc
 
 - Authentication: SimpleJWT
 
-- Chat: WebSockets (Django Channels)
+- Chat: WebSockets (Django Channels), Spacy(For natural language proceccing)
 
 - Database: SQLite (dev) 
 
