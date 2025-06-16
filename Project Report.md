@@ -13,7 +13,7 @@
 
 - Channels + Redis – WebSocket-based real-time communication
 
-- drf-yasg – API documentation (Swagger UI)
+- Spacy - For natural language proceccing
 
 - SQLite – Development database
 
