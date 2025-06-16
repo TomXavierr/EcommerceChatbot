@@ -40,12 +40,10 @@ An e-commerce web application with an intelligent chatbot assistant to guide use
 cd chatbot_store
 
 # Create and activate virtual environment at project root (if not already done)
-cd ..
 python -m venv venv
 source venv/bin/activate  # or venv\Scripts\activate on Windows
 
 # Install dependencies
-cd chatbot_store
 pip install -r ../requirements.txt
 
 # Run initial migrations
