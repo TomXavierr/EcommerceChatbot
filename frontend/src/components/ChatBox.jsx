@@ -67,7 +67,6 @@ const ChatBox = ({ onClose }) => {
   const clearChat = () => {
     if (ws.current?.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify({ user_id: userId, clear_chat: true }));
-      // Clear messages locally immediately (optional, you can wait for server confirmation)
       setMessages([]);
     }
   };

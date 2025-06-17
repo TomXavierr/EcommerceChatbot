@@ -17,12 +17,12 @@ const App = () => {
   return (
     <Router>
       <main className="relative min-h-screen flex flex-col">
-        {/* Navbar */}
         <Nav />
 
-        {/* Page content */}
+
         <div className="flex-grow pt-20">
           <Routes>
+            
             <Route path="/" element={<Home />} />
             <Route path="/store" element={<Store />} />
             <Route path="/product/:id" element={<ProductDetails />} />

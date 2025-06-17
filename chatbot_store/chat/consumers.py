@@ -82,7 +82,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return {"text": "Hello! How can I assist you today?"}
 
         if category_kw:
-            # Filter by category only
+            # Filter by category
             def filter_by_category():
                 qs = Product.objects.filter(category__name__icontains=category_kw)
                 return list(qs.values("id", "name"))
@@ -90,7 +90,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             search_term = category_kw
 
         elif product_kw:
-            # Filter by product name only
+            # Filter by product name 
             def filter_by_product():
                 qs = Product.objects.filter(name__icontains=product_kw)
                 return list(qs.values("id", "name"))
